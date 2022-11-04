@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InsertResult, Repository } from 'typeorm';
 import { DeckCardPivotEntity } from './deck-card-pivot.entity';
 
 @Injectable()
@@ -10,7 +10,10 @@ export class PivotService {
     private deckCardRepository: Repository<DeckCardPivotEntity>,
   ) {}
 
-  public async insertDeckCards(deckId: string, codes: { code: string }[]) {
+  public async insertDeckCards(
+    deckId: string,
+    codes: { code: string }[],
+  ): Promise<InsertResult> {
     const data = [];
     codes.forEach((item) => {
       data.push({ deck_id: deckId, card_code: item.code });

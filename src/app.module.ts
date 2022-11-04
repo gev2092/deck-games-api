@@ -10,7 +10,7 @@ import { PivotModule } from './pivot/pivot.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres', // this all could be in config file instead of hardcoded credentials
+      type: 'postgres', // this all could be in config file instead of hardcoded values
       host: 'localhost',
       port: 5432,
       username: 'postgres',

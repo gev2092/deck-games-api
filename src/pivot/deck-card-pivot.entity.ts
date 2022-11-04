@@ -8,7 +8,7 @@ export class DeckCardPivotEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column()
+  @Column('uuid')
   deck_id: string; // should be foreign key
 
   @Column()

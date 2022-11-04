@@ -3,6 +3,9 @@ import { CreateDeckBodyDto } from '../dtos/deck/create-deck-body.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeckEntity } from './deck.entity';
 import { Repository } from 'typeorm';
+import { DeckCardPivotEntity } from '../pivot/deck-card-pivot.entity';
+import { CardEntity } from '../card/card.entity';
+import { TypeEnum } from '../enums/type.enum';
 
 @Injectable()
 export class DeckService {
@@ -11,7 +14,9 @@ export class DeckService {
     private deckRepository: Repository<DeckEntity>,
   ) {}
 
-  public async createDeck(reqParams: CreateDeckBodyDto) {
+  public async createDeck(
+    reqParams: CreateDeckBodyDto,
+  ): Promise<{ id: string; type: TypeEnum; is_shuffled: boolean }> {
     const result = await this.deckRepository
       .createQueryBuilder()
       .insert()
@@ -24,12 +29,18 @@ export class DeckService {
     return result.raw[0];
   }
 
-  public async openDeck(deckId: string) {
+  public async openDeck(deck_id: string): Promise<object> {
     const result = await this.deckRepository
       .createQueryBuilder('deck')
-      .leftJoinAndSelect('deck_id', 'card')
-      .where('deck_id = :deckId', { deckId: deckId })
-      .getQueryAndParameters();
-    console.log(result);
+      .select(
+        'deck.id, deck.type, deck.is_shuffled as shuffled, count(card) as remaining, json_agg(card) as cards',
+      )
+      .leftJoin(DeckCardPivotEntity, 'pivot', 'deck.id = pivot.deck_id')
+      .leftJoin(CardEntity, 'card', 'pivot.card_code = card.code')
+      .where('deck.id = :deck_id', { deck_id })
+      .groupBy('deck.id')
+      .execute();
+
+    return result[0];
   }
 }

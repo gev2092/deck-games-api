@@ -11,7 +11,10 @@ export class CardService {
     private cardRepository: Repository<CardEntity>,
   ) {}
 
-  public async getCards(type: TypeEnum, shuffled: boolean) {
+  public async getCards(
+    type: TypeEnum,
+    shuffled: boolean,
+  ): Promise<CardEntity[]> {
     const query = this.cardRepository.createQueryBuilder().select('code');
 
     if (type === TypeEnum.Short) {

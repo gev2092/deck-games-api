@@ -1,9 +1,17 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { CreateDeckBodyDto } from '../dtos/deck/create-deck-body.dto';
 import { DeckService } from './deck.service';
 import { CardService } from '../card/card.service';
 import { PivotService } from '../pivot/pivot.service';
-import { OpenDeckDto } from "../dtos/deck/open-deck.dto";
+import { OpenDeckDto } from '../dtos/deck/open-deck.dto';
+import { TypeEnum } from '../enums/type.enum';
 
 @Controller('deck')
 export class DeckController {
@@ -14,7 +22,9 @@ export class DeckController {
   ) {}
 
   @Post('create')
-  async createDeck(@Body() body: CreateDeckBodyDto) {
+  async createDeck(
+    @Body() body: CreateDeckBodyDto,
+  ): Promise<{ id: string; type: TypeEnum; is_shuffled: boolean }> {
     const deck = await this.deckService.createDeck(body);
     const cardCodes = await this.cardService.getCards(body.type, body.shuffled);
 
@@ -24,7 +34,11 @@ export class DeckController {
   }
 
   @Get('open/:deckId')
-  openDeck(@Param() param: OpenDeckDto) {
-    return this.deckService.openDeck(param.deckId);
+  async openDeck(@Param() param: OpenDeckDto) {
+    const openedDeck = await this.deckService.openDeck(param.deckId);
+
+    return openedDeck && Object.keys(openedDeck).length > 0
+      ? openedDeck
+      : new NotFoundException('No record found');
   }
 }
